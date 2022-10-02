@@ -26,13 +26,13 @@ void AppendEscapedStringTo(std::string* str, const Slice& value) {
       str->push_back(c);
     } else {
       char buf[10];
-      // %02x 表示一共两位，不足两位用0补足；大于两位不会截断
       snprintf(buf, sizeof(buf), "\\x%02x",
                static_cast<unsigned int>(c) & 0xff);
       str->append(buf);
     }
   }
 }
+
 std::string NumberToString(uint64_t num) {
   std::string r;
   AppendNumberTo(&r, num);
@@ -44,7 +44,7 @@ std::string EscapeString(const Slice& value) {
   AppendEscapedStringTo(&r, value);
   return r;
 }
-// consume c in Slice
+
 bool ConsumeChar(Slice* in, char c) {
   if (!in->empty() && (*in)[0] == c) {
     in->remove_prefix(1);
@@ -57,7 +57,6 @@ bool ConsumeChar(Slice* in, char c) {
 bool ConsumeDecimalNumber(Slice* in, uint64_t* val) {
   uint64_t v = 0;
   int digits = 0;
-  // consume concurrent number 0-9
   while (!in->empty()) {
     char c = (*in)[0];
     if (c >= '0' && c <= '9') {

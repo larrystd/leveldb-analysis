@@ -1,3 +1,113 @@
+#### leveldb analysis
+组合关系和继承关系
+wal
+memtable
+block->table->sst
+
+├── db
+│   ├── builder.cc
+│   ├── builder.h
+│   ├── c.cc
+│   ├── corruption_test.cc
+│   ├── db_bench.cc
+│   ├── db_impl.cc
+│   ├── db_impl.h
+│   ├── db_iter.cc
+│   ├── db_iter.h
+│   ├── dbformat.cc
+│   ├── dbformat.h
+│   ├── filename.cc
+│   ├── filename.h
+│   ├── log_format.h
+│   ├── log_reader.cc
+│   ├── log_reader.h
+│   ├── log_writer.cc
+│   ├── log_writer.h
+│   ├── memtable.cc
+│   ├── memtable.h
+│   ├── repair.cc
+│   ├── skiplist.h
+│   ├── snapshot.h
+│   ├── table_cache.cc
+│   ├── table_cache.h
+│   ├── version_edit.cc
+│   ├── version_edit.h
+│   ├── version_set.cc
+│   ├── version_set.h
+│   ├── write_batch.cc
+│   ├── write_batch_internal.h
+
+├── include
+│   └── leveldb
+│       ├── c.h
+│       ├── cache.h
+│       ├── comparator.h
+│       ├── db.h
+│       ├── env.h
+│       ├── iterator.h
+│       ├── options.h
+│       ├── slice.h
+│       ├── status.h
+│       ├── table.h
+│       ├── table_builder.h
+│       └── write_batch.h
+
+├── port
+│   ├── README
+│   ├── atomic_pointer.h
+│   ├── port.h
+│   ├── port_example.h
+│   ├── port_posix.cc
+│   ├── port_posix.h
+
+├── table
+│   ├── block.cc
+│   ├── block.h
+│   ├── block_builder.cc
+│   ├── block_builder.h
+│   ├── format.cc
+│   ├── format.h
+│   ├── iterator.cc
+│   ├── iterator_wrapper.h
+│   ├── merger.cc
+│   ├── merger.h
+│   ├── table.cc
+│   ├── table_builder.cc
+│   ├── table_test.cc
+│   ├── two_level_iterator.cc
+│   ├── two_level_iterator.h
+
+├── util
+│   ├── arena.cc
+│   ├── arena.h
+│   ├── cache.cc
+│   ├── coding.cc
+│   ├── coding.h
+│   ├── comparator.cc
+│   ├── crc32c.cc
+│   ├── crc32c.h
+│   ├── env.cc
+│   ├── env_posix.cc
+│   ├── env_posix.o
+│   ├── hash.cc
+│   ├── hash.h
+│   ├── histogram.cc
+│   ├── histogram.h
+│   ├── logging.cc
+│   ├── logging.h
+│   ├── mutexlock.h
+│   ├── options.cc
+│   ├── posix_logger.h
+│   ├── random.h
+│   ├── status.cc
+│   ├── testharness.cc
+│   ├── testharness.h
+│   ├── testutil.cc
+│   ├── testutil.h
+
+
+#### leveldb: A key-value store
+
 leveldb: A key-value store
 Authors: Sanjay Ghemawat (sanjay@google.com) and Jeff Dean (jeff@google.com)
 

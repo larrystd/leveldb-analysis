@@ -14,10 +14,10 @@ namespace leveldb {
 
 class VersionSet;
 
-struct FileMetaData {
+struct FileMetaData {   // SST fileMeta struct
   int refs;
   int allowed_seeks;          // Seeks allowed until compaction
-  uint64_t number;
+  uint64_t number;            // File_number is part of filename
   uint64_t file_size;         // File size in bytes
   InternalKey smallest;       // Smallest internal key served by table
   InternalKey largest;        // Largest internal key served by table

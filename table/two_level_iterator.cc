@@ -12,9 +12,9 @@
 namespace leveldb {
 
 namespace {
-
+// Function pointer, return Iterator*
 typedef Iterator* (*BlockFunction)(void*, const ReadOptions&, const Slice&);
-
+// Simultaneouly key and value iterator
 class TwoLevelIterator: public Iterator {
  public:
   TwoLevelIterator(
@@ -34,6 +34,7 @@ class TwoLevelIterator: public Iterator {
   virtual bool Valid() const {
     return data_iter_.Valid();
   }
+  // Get 
   virtual Slice key() const {
     assert(Valid());
     return data_iter_.key();
@@ -43,7 +44,7 @@ class TwoLevelIterator: public Iterator {
     return data_iter_.value();
   }
   virtual Status status() const {
-    // It'd be nice if status() returned a const Status& instead of a Status
+    // It'd be nice if status() returned a const Status& instread of Status
     if (!index_iter_.status().ok()) {
       return index_iter_.status();
     } else if (data_iter_.iter() != NULL && !data_iter_.status().ok()) {
@@ -66,7 +67,7 @@ class TwoLevelIterator: public Iterator {
   void* arg_;
   const ReadOptions options_;
   Status status_;
-  IteratorWrapper index_iter_;
+  IteratorWrapper index_iter_;  // index_iter_ and data_iter_
   IteratorWrapper data_iter_; // May be NULL
   // If data_iter_ is non-NULL, then "data_block_handle_" holds the
   // "index_value" passed to block_function_ to create the data_iter_.
@@ -75,7 +76,7 @@ class TwoLevelIterator: public Iterator {
 
 TwoLevelIterator::TwoLevelIterator(
     Iterator* index_iter,
-    BlockFunction block_function,
+    BlockFunction block_function,  /* BlockReader */
     void* arg,
     const ReadOptions& options)
     : block_function_(block_function),
@@ -88,10 +89,10 @@ TwoLevelIterator::TwoLevelIterator(
 TwoLevelIterator::~TwoLevelIterator() {
 }
 
-void TwoLevelIterator::Seek(const Slice& target) {
-  index_iter_.Seek(target);
-  InitDataBlock();
-  if (data_iter_.iter() != NULL) data_iter_.Seek(target);
+void TwoLevelIterator::Seek(const Slice& target) {  // TwoLevelIterator(index and block level) find target key
+  index_iter_.Seek(target);  // Find target key
+  InitDataBlock();  // ReadBlock and set dataiter with indexiter
+  if (data_iter_.iter() != NULL) data_iter_.Seek(target);  // Set data_iter_ with key target
   SkipEmptyDataBlocksForward();
 }
 
@@ -109,9 +110,9 @@ void TwoLevelIterator::SeekToLast() {
   SkipEmptyDataBlocksBackward();
 }
 
-void TwoLevelIterator::Next() {
+void TwoLevelIterator::Next() {  // Make data_iter_ move to next
   assert(Valid());
-  data_iter_.Next();
+  data_iter_.Next();  
   SkipEmptyDataBlocksForward();
 }
 
@@ -157,14 +158,14 @@ void TwoLevelIterator::InitDataBlock() {
   if (!index_iter_.Valid()) {
     SetDataIterator(NULL);
   } else {
-    Slice handle = index_iter_.value();
+    Slice handle = index_iter_.value();  // Get index value
     if (data_iter_.iter() != NULL && handle.compare(data_block_handle_) == 0) {
       // data_iter_ is already constructed with this iterator, so
       // no need to change anything
     } else {
-      Iterator* iter = (*block_function_)(arg_, options_, handle);
+      Iterator* iter = (*block_function_)(arg_, options_, handle);  // Call BlockReader, return datablock iterator
       data_block_handle_.assign(handle.data(), handle.size());
-      SetDataIterator(iter);
+      SetDataIterator(iter);  // Set iter as dataiterator
     }
   }
 }

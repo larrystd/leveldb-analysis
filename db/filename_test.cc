@@ -18,7 +18,7 @@ TEST(FileNameTest, Parse) {
   FileType type;
   uint64_t number;
 
-  // Successful parses
+  // Successful parses filename
   static struct {
     const char* fname;
     uint64_t number;
@@ -35,6 +35,7 @@ TEST(FileNameTest, Parse) {
     { "LOG.old",            0,     kInfoLogFile },
     { "18446744073709551615.log", 18446744073709551615ull, kLogFile },
   };
+
   for (int i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
     std::string f = cases[i].fname;
     ASSERT_TRUE(ParseFileName(f, &number, &type)) << f;
@@ -42,7 +43,7 @@ TEST(FileNameTest, Parse) {
     ASSERT_EQ(cases[i].number, number) << f;
   }
 
-  // Errors
+  // Errors filename
   static const char* errors[] = {
     "",
     "foo",
@@ -73,7 +74,7 @@ TEST(FileNameTest, Parse) {
   };
 }
 
-TEST(FileNameTest, Construction) {
+TEST(FileNameTest, ValidFileName) {
   uint64_t number;
   FileType type;
   std::string fname;

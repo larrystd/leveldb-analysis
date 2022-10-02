@@ -58,7 +58,7 @@ static const bool kLittleEndian = IS_LITTLE_ENDIAN;
 
 class CondVar;
 
-class Mutex {
+class Mutex {  // Wrappered pthread_mutex_t
  public:
   Mutex();
   ~Mutex();
@@ -76,7 +76,7 @@ class Mutex {
   void operator=(const Mutex&);
 };
 
-class CondVar {
+class CondVar {  // Wrappered pthread_cond_t
  public:
   explicit CondVar(Mutex* mu);
   ~CondVar();

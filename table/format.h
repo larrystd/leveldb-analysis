@@ -16,13 +16,14 @@ namespace leveldb {
 class Block;
 class RandomAccessFile;
 struct ReadOptions;
+
 // BlockHandle is a pointer to the extent of a file that stores a data
-// block or a meta block
+// block or a meta block.
 class BlockHandle {
- public: 
+ public:
   BlockHandle();
 
-  // The offset of the block in the file
+  // The offset of the block in the file.
   uint64_t offset() const { return offset_; }
   void set_offset(uint64_t offset) { offset_ = offset; }
 
@@ -36,10 +37,11 @@ class BlockHandle {
   // Maximum encoding length of a BlockHandle
   enum { kMaxEncodedLength = 10 + 10 };
 
- private:  
+ private:
   uint64_t offset_;
   uint64_t size_;
 };
+
 // Footer encapsulates the fixed information stored at the tail
 // end of every table file.
 class Footer {
@@ -76,7 +78,7 @@ class Footer {
 // kTableMagicNumber was picked by running
 //    echo http://code.google.com/p/leveldb/ | sha1sum
 // and taking the leading 64 bits.
-static const uint64_t kTableMagicNumber = 0xdb4775248bf80b57ull;  // 8bytes
+static const uint64_t kTableMagicNumber = 0xdb4775248b80fb57ull;
 
 // 1-byte type + 32-bit crc
 static const size_t kBlockTrailerSize = 5;

@@ -100,15 +100,15 @@ void TableBuilder::Add(const Slice& key, const Slice& value) {
 
   r->last_key.assign(key.data(), key.size());
   r->num_entries++;
-  r->data_block.Add(key, value);
+  r->data_block.Add(key, value);  // BlockBuild::Add key:value
 
   const size_t estimated_block_size = r->data_block.CurrentSizeEstimate();
   if (estimated_block_size >= r->options.block_size) {
-    Flush();
+    Flush();  // Auto flush
   }
 }
 
-void TableBuilder::Flush() {
+void TableBuilder::Flush() {  // Write datablock to file
   Rep* r = rep_;
   assert(!r->closed);
   if (!ok()) return;
@@ -174,7 +174,7 @@ Status TableBuilder::status() const {
   return rep_->status;
 }
 
-Status TableBuilder::Finish() {
+Status TableBuilder::Finish() {  // Write meta and index block part to file
   Rep* r = rep_;
   Flush();
   assert(!r->closed);
@@ -184,7 +184,7 @@ Status TableBuilder::Finish() {
   if (ok()) {
     BlockBuilder meta_index_block(&r->options);
     // TODO(postrelease): Add stats and other meta blocks
-    WriteBlock(&meta_index_block, &metaindex_block_handle);
+    WriteBlock(&meta_index_block, &metaindex_block_handle);  // Write meta_index_block to file
   }
   if (ok()) {
     if (r->pending_index_entry) {
@@ -194,7 +194,7 @@ Status TableBuilder::Finish() {
       r->index_block.Add(r->last_key, Slice(handle_encoding));
       r->pending_index_entry = false;
     }
-    WriteBlock(&r->index_block, &index_block_handle);
+    WriteBlock(&r->index_block, &index_block_handle);  // Write indexblock to file
   }
   if (ok()) {
     Footer footer;

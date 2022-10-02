@@ -11,13 +11,14 @@
 
 namespace leveldb {
 
+// Binding file and table
 struct TableAndFile {
   RandomAccessFile* file;
   Table* table;
 };
 
 static void DeleteEntry(const Slice& key, void* value) {
-  TableAndFile* tf = reinterpret_cast<TableAndFile*>(value);
+  TableAndFile* tf = reinterpret_cast<TableAndFile*>(value);  // Tranform value to TableAndFile
   delete tf->table;
   delete tf->file;
   delete tf;
@@ -42,8 +43,8 @@ TableCache::~TableCache() {
   delete cache_;
 }
 
-Iterator* TableCache::NewIterator(const ReadOptions& options,
-                                  uint64_t file_number,
+Iterator* TableCache::NewIterator(const ReadOptions& options, 
+                                  uint64_t file_number, 
                                   uint64_t file_size,
                                   Table** tableptr) {
   if (tableptr != NULL) {
@@ -52,15 +53,16 @@ Iterator* TableCache::NewIterator(const ReadOptions& options,
 
   char buf[sizeof(file_number)];
   EncodeFixed64(buf, file_number);
-  Slice key(buf, sizeof(buf));
+  Slice key(buf, sizeof(buf));  // file_number as key
   Cache::Handle* handle = cache_->Lookup(key);
   if (handle == NULL) {
     std::string fname = TableFileName(dbname_, file_number);
     RandomAccessFile* file = NULL;
     Table* table = NULL;
-    Status s = env_->NewRandomAccessFile(fname, &file);
-    if (s.ok()) {
-      s = Table::Open(*options_, file, file_size, &table);
+    Status s = env_->NewRandomAccessFile(fname, &file);  // Generate file name, to open
+
+    if (!s.ok()) {
+      s = Table::Open(*options_, file, file_size, &table);  // Open filename and get index_block to table instance
     }
 
     if (!s.ok()) {
@@ -78,12 +80,12 @@ Iterator* TableCache::NewIterator(const ReadOptions& options,
   }
 
   Table* table = reinterpret_cast<TableAndFile*>(cache_->Value(handle))->table;
-  Iterator* result = table->NewIterator(options);
-  result->RegisterCleanup(&UnrefEntry, cache_, handle);
+  Iterator* result = table->NewIterator(options);  // Construct table iterator, i.e., NewTwoLevelIterator
+  result->RegisterCleanup(&UnrefEntry, cache_, handle); // Set cleanup object
   if (tableptr != NULL) {
     *tableptr = table;
   }
-  return result;
+  return result;  // NewTwoLevelIterator, indexiter and dataiter
 }
 
 void TableCache::Evict(uint64_t file_number) {

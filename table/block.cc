@@ -16,9 +16,9 @@ namespace leveldb {
 
 inline uint32_t Block::NumRestarts() const {
   assert(size_ >= 2*sizeof(uint32_t));
-  return DecodeFixed32(data_ + size_ - sizeof(uint32_t));
+  return DecodeFixed32(data_ + size_ - sizeof(uint32_t));  // 将地址开始的四个字节转换成32位无符号整数返回
 }
-
+// 将data开始的字符串解析成Block
 Block::Block(const char* data, size_t size, bool take_ownership)
     : data_(data),
       size_(size),
@@ -26,10 +26,10 @@ Block::Block(const char* data, size_t size, bool take_ownership)
   if (size_ < sizeof(uint32_t)) {
     size_ = 0;  // Error marker
   } else {
-    restart_offset_ = size_ - (1 + NumRestarts()) * sizeof(uint32_t);
+    restart_offset_ = size_ - (1 + NumRestarts()) * sizeof(uint32_t);  // restart的偏移地址
     if (restart_offset_ > size_ - sizeof(uint32_t)) {
       // The size is too small for NumRestarts() and therefore
-      // restart_offset_ wrapped around.
+      // restart_offset_ wrapper around.
       size_ = 0;
     }
   }
@@ -93,7 +93,7 @@ class Block::Iter : public Iterator {
   inline uint32_t NextEntryOffset() const {
     return (value_.data() + value_.size()) - data_;
   }
-
+  // Get restart point with index
   uint32_t GetRestartPoint(uint32_t index) {
     assert(index < num_restarts_);
     return DecodeFixed32(data_ + restarts_ + index * sizeof(uint32_t));
@@ -111,7 +111,7 @@ class Block::Iter : public Iterator {
 
  public:
   Iter(const Comparator* comparator,
-       const char* data,
+       const char* data,    /* 直接通过char* 字符串构造Iterator */
        uint32_t restarts,
        uint32_t num_restarts)
       : comparator_(comparator),
@@ -250,7 +250,7 @@ class Block::Iter : public Iterator {
     }
   }
 };
-
+// Container::Iterator, including indexblock and datablock iterators
 Iterator* Block::NewIterator(const Comparator* cmp) {
   if (size_ < 2*sizeof(uint32_t)) {
     return NewErrorIterator(Status::Corruption("bad block contents"));

@@ -15,15 +15,15 @@
 namespace leveldb {
 namespace test {
 
-// Run some of the tests registered by the Test() macro. If the
-// environment variable "LEVELDB_TESTS" is not set, run all tests.
+// Run some of the tests registered by the TEST() macro.  If the
+// environment variable "LEVELDB_TESTS" is not set, runs all tests.
 // Otherwise, runs only the tests whose name contains the value of
-// "LEVELDB_TESTS" as a substring. E.g., suppose the tests are:
-//     TEST(Foo, Hello) { ... }
-//     TEST(Foo, World) { ... }
-// LEVELDB_TESTS=Hello  will run the first test
-// LEVELDB_TESTS=o      will run both tests
-// LEVELDB_TESTS=Junk   will run no tests
+// "LEVELDB_TESTS" as a substring.  E.g., suppose the tests are:
+//    TEST(Foo, Hello) { ... }
+//    TEST(Foo, World) { ... }
+// LEVELDB_TESTS=Hello will run the first test
+// LEVELDB_TESTS=o     will run both tests
+// LEVELDB_TESTS=Junk  will run no tests
 //
 // Returns 0 if all tests pass.
 // Dies or returns a non-zero value if some test fails.
@@ -32,24 +32,23 @@ extern int RunAllTests();
 // Return the directory to use for temporary storage.
 extern std::string TmpDir();
 
-// Return a randomization seed for this run. Typeically returns the
-// same numer on repeated invocations of this binary, but automated
+// Return a randomization seed for this run.  Typically returns the
+// same number on repeated invocations of this binary, but automated
 // runs may be able to vary the seed.
 extern int RandomSeed();
 
 // An instance of Tester is allocated to hold temporary state during
 // the execution of an assertion.
 class Tester {
- private:  
+ private:
   bool ok_;
   const char* fname_;
   int line_;
-  std::stringstream ss_;  // support <<, >>
-  
- public:  
-  Tester(const char* f, int l)    // paramets: filename, line
-      : ok_(true), fname_(f), line_(l) {
+  std::stringstream ss_;
 
+ public:
+  Tester(const char* f, int l)
+      : ok_(true), fname_(f), line_(l) {
   }
 
   ~Tester() {
@@ -67,34 +66,34 @@ class Tester {
     return *this;
   }
 
-  Tester& IsOK(const Status& s) {
+  Tester& IsOk(const Status& s) {
     if (!s.ok()) {
       ss_ << " " << s.ToString();
       ok_ = false;
     }
     return *this;
   }
-// define operator by micro
-// unfine之后不能再用这个宏了
-#define BINARY_OP(name, op)                                   \
-  template <class X, class Y>                                 \
-  Tester& name(const X& x, const Y& y) {                      \
-    if (! (x op y)) {                                         \
-      ss_ << " failed: " << x << (" " #op " ") << y;          \
-      ok_ = false;                                            \
-    }                                                         \
-    return *this;                                             \
+
+#define BINARY_OP(name,op)                              \
+  template <class X, class Y>                           \
+  Tester& name(const X& x, const Y& y) {                \
+    if (! (x op y)) {                                   \
+      ss_ << " failed: " << x << (" " #op " ") << y;    \
+      ok_ = false;                                      \
+    }                                                   \
+    return *this;                                       \
   }
 
-  BINARY_OP(IsEq, ==);
-  BINARY_OP(IsNe, !=);
-  BINARY_OP(IsGe, >=);
-  BINARY_OP(IsGt, >);
-  BINARY_OP(IsLe, <=);
-  BINARY_OP(IsLt, <);
+  BINARY_OP(IsEq, ==)
+  BINARY_OP(IsNe, !=)
+  BINARY_OP(IsGe, >=)
+  BINARY_OP(IsGt, >)
+  BINARY_OP(IsLe, <=)
+  BINARY_OP(IsLt, <)
 #undef BINARY_OP
 
   // Attach the specified value to the error message if an error has occurred
+  // 单测类也可以重载<<
   template <class V>
   Tester& operator<<(const V& value) {
     if (!ok_) {
@@ -103,7 +102,7 @@ class Tester {
     return *this;
   }
 };
-// 使用宏的好处, 其一可以正确使用__FILE__的帮助
+
 #define ASSERT_TRUE(c) ::leveldb::test::Tester(__FILE__, __LINE__).Is((c), #c)
 #define ASSERT_OK(s) ::leveldb::test::Tester(__FILE__, __LINE__).IsOk((s))
 #define ASSERT_EQ(a,b) ::leveldb::test::Tester(__FILE__, __LINE__).IsEq((a),(b))
@@ -112,27 +111,27 @@ class Tester {
 #define ASSERT_GT(a,b) ::leveldb::test::Tester(__FILE__, __LINE__).IsGt((a),(b))
 #define ASSERT_LE(a,b) ::leveldb::test::Tester(__FILE__, __LINE__).IsLe((a),(b))
 #define ASSERT_LT(a,b) ::leveldb::test::Tester(__FILE__, __LINE__).IsLt((a),(b))
-// define variable that is a##b
+
 #define TCONCAT(a,b) TCONCAT1(a,b)
 #define TCONCAT1(a,b) a##b
-// base is the tested class, call _Run() with static _RunIt()
-// _Test_ is just a literal
-#define TEST(base, name)                                                \
+
+#define TEST(base,name)                                                 \
 class TCONCAT(_Test_,name) : public base {                              \
  public:                                                                \
   void _Run();                                                          \
   static void _RunIt() {                                                \
-    TCONCAT(_Test_,name) t;                                              \
+    TCONCAT(_Test_,name) t;                                             \
     t._Run();                                                           \
   }                                                                     \
 };                                                                      \
 bool TCONCAT(_Test_ignored_,name) =                                     \
   ::leveldb::test::RegisterTest(#base, #name, &TCONCAT(_Test_,name)::_RunIt); \
 void TCONCAT(_Test_,name)::_Run()
-// Implment the function executed
-// Register the specified test. Typically not used directly, but
+
+// Register the specified test.  Typically not used directly, but
 // invoked via the macro expansion of TEST.
 extern bool RegisterTest(const char* base, const char* name, void (*func)());
+
 
 }  // namespace test
 }  // namespace leveldb

@@ -55,7 +55,7 @@ extern bool SomeFileOverlapsRange(
     const Slice* smallest_user_key,
     const Slice* largest_user_key);
 
-class Version {
+class Version {  // Version struct maintains the sst files
  public:
   // Append to *iters a sequence of iterators that will
   // yield the contents of this Version when merged together.
@@ -118,7 +118,7 @@ class Version {
   Version* prev_;               // Previous version in linked list
   int refs_;                    // Number of live refs to this version
 
-  // List of files per level
+  // List of fileMeta data per level
   std::vector<FileMetaData*> files_[config::kNumLevels];
 
   // Next file to compact based on seek stats.
@@ -146,7 +146,7 @@ class Version {
   void operator=(const Version&);
 };
 
-class VersionSet {
+class VersionSet {  // Maintain the version double linkedlist
  public:
   VersionSet(const std::string& dbname,
              const Options* options,

@@ -71,6 +71,7 @@
         "ios": "cpp",
         "locale": "cpp",
         "queue": "cpp",
-        "__memory": "cpp"
+        "__memory": "cpp",
+        "__functional_03": "cpp"
     }
 }

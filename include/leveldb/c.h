@@ -39,7 +39,7 @@
 
 #ifndef STORAGE_LEVELDB_INCLUDE_C_H_
 #define STORAGE_LEVELDB_INCLUDE_C_H_
-
+// extern "C" 内部的变量, 函数按照C语言的规则命名
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,12 +67,11 @@ typedef struct leveldb_writebatch_t    leveldb_writebatch_t;
 typedef struct leveldb_writeoptions_t  leveldb_writeoptions_t;
 
 /* DB operations */
-
 extern leveldb_t* leveldb_open(
     const leveldb_options_t* options,
     const char* name,
     char** errptr);
-
+ 
 extern void leveldb_close(leveldb_t* db);
 
 extern void leveldb_put(

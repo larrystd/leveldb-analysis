@@ -64,14 +64,13 @@ std::string OldInfoLogFileName(const std::string& dbname) {
   return dbname + "/LOG.old";
 }
 
-
 // Owned filenames have the form:
-//    dbname/CURRENT
-//    dbname/LOCK
-//    dbname/LOG
-//    dbname/LOG.old
-//    dbname/MANIFEST-[0-9]+
-//    dbname/[0-9]+.(log|sst)
+//      dbname/CURRENT
+//      dbname/LOCK
+//      dbname/LOG
+//      dbname/LOG.old
+//      dbname/MANIFEST-[0-9]+
+//      dbname/[0-9]+.(log|sst)
 bool ParseFileName(const std::string& fname,
                    uint64_t* number,
                    FileType* type) {
@@ -113,7 +112,7 @@ bool ParseFileName(const std::string& fname,
     } else {
       return false;
     }
-    *number = num;
+    *number = num;    
   }
   return true;
 }

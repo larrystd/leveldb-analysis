@@ -6,6 +6,7 @@
 
 #include "leveldb/cache.h"
 #include "leveldb/env.h"
+#include "leveldb/iterator.h"
 #include "table/block.h"
 #include "table/format.h"
 #include "table/two_level_iterator.h"
@@ -20,11 +21,11 @@ struct Table::Rep {
 
   Options options;
   Status status;
-  RandomAccessFile* file;
+  RandomAccessFile* file;    // Table in file
   uint64_t cache_id;
 
-  BlockHandle metaindex_handle;  // Handle to metaindex_block: saved from footer
-  Block* index_block;
+  BlockHandle metaindex_handle;  // Handle to metaindex_block: saved from footer.
+  Block* index_block;           // Only index_block, Table::Rep generally store index_block
 };
 
 Status Table::Open(const Options& options,
@@ -35,7 +36,7 @@ Status Table::Open(const Options& options,
   if (size < Footer::kEncodedLength) {
     return Status::InvalidArgument("file is too short to be an sstable");
   }
-
+  // Read and construct footer instance
   char footer_space[Footer::kEncodedLength];
   Slice footer_input;
   Status s = file->Read(size - Footer::kEncodedLength, Footer::kEncodedLength,
@@ -46,14 +47,14 @@ Status Table::Open(const Options& options,
   s = footer.DecodeFrom(&footer_input);
   if (!s.ok()) return s;
 
-  // Read the index block
+  // Read the index block from file
   Block* index_block = NULL;
   if (s.ok()) {
     bool may_cache;  // Ignored result
     s = ReadBlock(file, ReadOptions(), footer.index_handle(), &index_block,
                   &may_cache);
   }
-
+  // Construct table instance
   if (s.ok()) {
     // We've successfully read the footer and the index block: we're
     // ready to serve requests.
@@ -89,9 +90,9 @@ static void ReleaseBlock(void* arg, void* h) {
   Cache::Handle* handle = reinterpret_cast<Cache::Handle*>(h);
   cache->Release(handle);
 }
-
 // Convert an index iterator value (i.e., an encoded BlockHandle)
-// into an iterator over the contents of the corresponding block.
+// into an iterator over the contents of the corresponding block
+// BlockReader, return: datablock Iterator*
 Iterator* Table::BlockReader(void* arg,
                              const ReadOptions& options,
                              const Slice& index_value) {
@@ -102,7 +103,7 @@ Iterator* Table::BlockReader(void* arg,
 
   BlockHandle handle;
   Slice input = index_value;
-  Status s = handle.DecodeFrom(&input);
+  Status s = handle.DecodeFrom(&input);  // index_value to offset and size
   // We intentionally allow extra stuff in index_value so that we
   // can add more features in the future.
 
@@ -117,7 +118,7 @@ Iterator* Table::BlockReader(void* arg,
       if (cache_handle != NULL) {
         block = reinterpret_cast<Block*>(block_cache->Value(cache_handle));
       } else {
-        s = ReadBlock(table->rep_->file, options, handle, &block, &may_cache);
+        s = ReadBlock(table->rep_->file, options, handle, &block, &may_cache);  // Read block towarding block handle
         if (s.ok() && may_cache && options.fill_cache) {
           cache_handle = block_cache->Insert(
               key, block, block->size(), &DeleteCachedBlock);
@@ -130,7 +131,7 @@ Iterator* Table::BlockReader(void* arg,
 
   Iterator* iter;
   if (block != NULL) {
-    iter = block->NewIterator(table->rep_->options.comparator);
+    iter = block->NewIterator(table->rep_->options.comparator);  // datablock iterator
     if (cache_handle == NULL) {
       iter->RegisterCleanup(&DeleteBlock, block, NULL);
     } else {
@@ -144,8 +145,8 @@ Iterator* Table::BlockReader(void* arg,
 
 Iterator* Table::NewIterator(const ReadOptions& options) const {
   return NewTwoLevelIterator(
-      rep_->index_block->NewIterator(rep_->options.comparator),
-      &Table::BlockReader, const_cast<Table*>(this), options);
+      rep_->index_block->NewIterator(rep_->options.comparator),  /* indexblock iterator */
+      &Table::BlockReader, const_cast<Table*>(this), options);    // 返回NewTwoLevelIterator很关键, 
 }
 
 uint64_t Table::ApproximateOffsetOf(const Slice& key) const {

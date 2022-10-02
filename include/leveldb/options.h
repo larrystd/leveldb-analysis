@@ -56,7 +56,7 @@ struct Options {
   bool paranoid_checks;
 
   // Use the specified object to interact with the environment,
-  // e.g. to read/write files, schedule background work, etc.
+  // e.g. to read/write files, schedule background work, etc.提供系统调用的封装, 跨平台
   // Default: Env::Default()
   Env* env;
 
@@ -106,7 +106,7 @@ struct Options {
 
   // Number of keys between restart points for delta encoding of keys.
   // This parameter can be changed dynamically.  Most clients should
-  // leave this parameter alone.
+  // leave this parameter alone. Every interval key exists a restart point. 
   //
   // Default: 16
   int block_restart_interval;
@@ -131,26 +131,26 @@ struct Options {
   Options();
 };
 
-// Options that control read operations
+// Options that control read operations, 注意ReadOptions和WriteOptions并没有继承Options类
 struct ReadOptions {
   // If true, all data read from underlying storage will be
   // verified against corresponding checksums.
   // Default: false
   bool verify_checksums;
-
+  
   // Should the data read for this iteration be cached in memory?
-  // Callers may wish to set this field to false for bulk scans.
+  // Callers may wish to set this field to false for bulk scans. 大量扫描
   // Default: true
   bool fill_cache;
 
   // If "snapshot" is non-NULL, read as of the supplied snapshot
   // (which must belong to the DB that is being read and which must
-  // not have been released).  If "snapshot" is NULL, use an impliicit
-  // snapshot of the state at the beginning of this read operation.
+  // not have been released). If "snapshot" is NULL, use an implicit
+  // snapshot of the state at the beginning of this read operation.使用第一次读操作的快照
   // Default: NULL
   const Snapshot* snapshot;
 
-  ReadOptions()
+  ReadOptions()  
       : verify_checksums(false),
         fill_cache(true),
         snapshot(NULL) {
@@ -162,7 +162,7 @@ struct WriteOptions {
   // If true, the write will be flushed from the operating system
   // buffer cache (by calling WritableFile::Sync()) before the write
   // is considered complete.  If this flag is true, writes will be
-  // slower.
+  // slower. 如果设置true, 则仅当完全刷入page cache才返回成功
   //
   // If this flag is false, and the machine crashes, some recent
   // writes may be lost.  Note that if it is just the process that

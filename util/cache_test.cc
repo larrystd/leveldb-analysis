@@ -13,7 +13,7 @@ namespace leveldb {
 // Conversions between numeric keys/values and the types expected by Cache.
 static std::string EncodeKey(int k) {
   std::string result;
-  PutFixed32(&result, k);  // 整型encode到字符串
+  PutFixed32(&result, k);
   return result;
 }
 static int DecodeKey(const Slice& k) {
@@ -33,7 +33,7 @@ class CacheTest {
   }
 
   static const int kCacheSize = 1000;
-  std::vector<int> deleted_keys_;  // 用于key和value的析构
+  std::vector<int> deleted_keys_;
   std::vector<int> deleted_values_;
   Cache* cache_;
 
@@ -46,8 +46,7 @@ class CacheTest {
   }
 
   int Lookup(int key) {
-    Cache::Handle* handle = cache_->Lookup(EncodeKey(key));  // 返回查到的节点
-    // Decode char* to int
+    Cache::Handle* handle = cache_->Lookup(EncodeKey(key));
     const int r = (handle == NULL) ? -1 : DecodeValue(cache_->Value(handle));
     if (handle != NULL) {
       cache_->Release(handle);
@@ -57,7 +56,7 @@ class CacheTest {
 
   void Insert(int key, int value, int charge = 1) {
     cache_->Release(cache_->Insert(EncodeKey(key), EncodeValue(value), charge,
-                                   &CacheTest::Deleter));  // 返回查到的节点, Releasez这个节点
+                                   &CacheTest::Deleter));
   }
 
   void Erase(int key) {
@@ -118,7 +117,7 @@ TEST(CacheTest, EntriesArePinned) {
   ASSERT_EQ(102, DecodeValue(cache_->Value(h2)));
   ASSERT_EQ(0, deleted_keys_.size());
 
-  cache_->Release(h1);  // 析构某个handle(node)
+  cache_->Release(h1);
   ASSERT_EQ(1, deleted_keys_.size());
   ASSERT_EQ(100, deleted_keys_[0]);
   ASSERT_EQ(101, deleted_values_[0]);

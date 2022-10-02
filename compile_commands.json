@@ -13,10 +13,130 @@
             "-O2",
             "-DNDEBUG",
             "-o",
-            "table/format.o",
-            "table/format.cc"
+            "util/testharness.o",
+            "util/testharness.cc"
         ],
         "directory": "/home/larry/curproj/leveldb",
-        "file": "table/format.cc"
+        "file": "util/testharness.cc"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-I.",
+            "-I./include",
+            "-fno-builtin-memcmp",
+            "-pthread",
+            "-DOS_LINUX",
+            "-DLEVELDB_PLATFORM_POSIX",
+            "-DSNAPPY",
+            "-O2",
+            "-DNDEBUG",
+            "-o",
+            "util/hash.o",
+            "util/hash.cc"
+        ],
+        "directory": "/home/larry/curproj/leveldb",
+        "file": "util/hash.cc"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-I.",
+            "-I./include",
+            "-fno-builtin-memcmp",
+            "-pthread",
+            "-DOS_LINUX",
+            "-DLEVELDB_PLATFORM_POSIX",
+            "-DSNAPPY",
+            "-O2",
+            "-DNDEBUG",
+            "-o",
+            "util/crc32c.o",
+            "util/crc32c.cc"
+        ],
+        "directory": "/home/larry/curproj/leveldb",
+        "file": "util/crc32c.cc"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-I.",
+            "-I./include",
+            "-fno-builtin-memcmp",
+            "-pthread",
+            "-DOS_LINUX",
+            "-DLEVELDB_PLATFORM_POSIX",
+            "-DSNAPPY",
+            "-O2",
+            "-DNDEBUG",
+            "-o",
+            "util/cache.o",
+            "util/cache.cc"
+        ],
+        "directory": "/home/larry/curproj/leveldb",
+        "file": "util/cache.cc"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-I.",
+            "-I./include",
+            "-fno-builtin-memcmp",
+            "-pthread",
+            "-DOS_LINUX",
+            "-DLEVELDB_PLATFORM_POSIX",
+            "-DSNAPPY",
+            "-O2",
+            "-DNDEBUG",
+            "-o",
+            "util/logging.o",
+            "util/logging.cc"
+        ],
+        "directory": "/home/larry/curproj/leveldb",
+        "file": "util/logging.cc"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-I.",
+            "-I./include",
+            "-fno-builtin-memcmp",
+            "-pthread",
+            "-DOS_LINUX",
+            "-DLEVELDB_PLATFORM_POSIX",
+            "-DSNAPPY",
+            "-O2",
+            "-DNDEBUG",
+            "-o",
+            "util/testutil.o",
+            "util/testutil.cc"
+        ],
+        "directory": "/home/larry/curproj/leveldb",
+        "file": "util/testutil.cc"
+    },
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-I.",
+            "-I./include",
+            "-fno-builtin-memcmp",
+            "-pthread",
+            "-DOS_LINUX",
+            "-DLEVELDB_PLATFORM_POSIX",
+            "-DSNAPPY",
+            "-O2",
+            "-DNDEBUG",
+            "-o",
+            "util/coding.o",
+            "util/coding.cc"
+        ],
+        "directory": "/home/larry/curproj/leveldb",
+        "file": "util/coding.cc"
     }
 ]

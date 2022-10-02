@@ -66,7 +66,7 @@ class Status {
 
  private:
   // OK status has a NULL state_.  Otherwise, state_ is a new[] array
-  // of the following form:
+  // of the following form: state structure
   //    state_[0..3] == length of message
   //    state_[4]    == code
   //    state_[5..]  == message
@@ -92,12 +92,13 @@ class Status {
 inline Status::Status(const Status& s) {
   state_ = (s.state_ == NULL) ? NULL : CopyState(s.state_);
 }
+
 inline void Status::operator=(const Status& s) {
   // The following condition catches both aliasing (when this == &s),
   // and the common case where both s and *this are ok.
   if (state_ != s.state_) {
     delete[] state_;
-    state_ = (s.state_ == NULL) ? NULL : CopyState(s.state_);
+    state_ = (s.state_ == NULL) ? NULL : CopyState(s.state_);  // Deep copy
   }
 }
 

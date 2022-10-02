@@ -278,7 +278,7 @@ static bool GetValue(const Comparator* cmp,
       *s = Status::NotFound(Slice());  // Use an empty error message for speed
       break;
     case kTypeValue: {
-      Slice v = iter->value();
+      Slice v = iter->value();  // set value
       value->assign(v.data(), v.size());
       break;
     }
@@ -294,7 +294,7 @@ Status Version::Get(const ReadOptions& options,
                     const LookupKey& k,
                     std::string* value,
                     GetStats* stats) {
-  Slice ikey = k.internal_key();
+  Slice ikey = k.internal_key();  // target key
   Slice user_key = k.user_key();
   const Comparator* ucmp = vset_->icmp_.user_comparator();
   Status s;
@@ -307,8 +307,10 @@ Status Version::Get(const ReadOptions& options,
   // We can search level-by-level since entries never hop across
   // levels.  Therefore we are guaranteed that if we find data
   // in an smaller level, later levels are irrelevant.
+  // Find file that contains key-value
   std::vector<FileMetaData*> tmp;
   FileMetaData* tmp2;
+  // Find the file containing key from each level
   for (int level = 0; level < config::kNumLevels; level++) {
     size_t num_files = files_[level].size();
     if (num_files == 0) continue;
@@ -350,7 +352,7 @@ Status Version::Get(const ReadOptions& options,
       }
     }
 
-    for (uint32_t i = 0; i < num_files; ++i) {
+    for (uint32_t i = 0; i < num_files; ++i) {  // Version one level files
       if (last_file_read != NULL && stats->seek_file == NULL) {
         // We have had more than one seek for this read.  Charge the 1st file.
         stats->seek_file = last_file_read;
@@ -364,9 +366,9 @@ Status Version::Get(const ReadOptions& options,
       Iterator* iter = vset_->table_cache_->NewIterator(
           options,
           f->number,
-          f->file_size);
-      iter->Seek(ikey);
-      const bool done = GetValue(ucmp, iter, user_key, value, &s);
+          f->file_size);  // Try to find data value in table_cache, using NewTwoLevelIterator(index and block level), get sst file index block.
+      iter->Seek(ikey);  // NewTwoLevelIterator tp get key
+      const bool done = GetValue(ucmp, iter, user_key, value, &s);  // Get value with user_key, iter->key, iter->data
       if (!iter->status().ok()) {
         s = iter->status();
         delete iter;
@@ -1135,11 +1137,11 @@ Iterator* VersionSet::MakeInputIterator(Compaction* c) {
   // TODO(opt): use concatenating iterator for level-0 if there is no overlap
   const int space = (c->level() == 0 ? c->inputs_[0].size() + 1 : 2);
   Iterator** list = new Iterator*[space];
-  int num = 0;
+  int num = 0;   // Number of all files
   for (int which = 0; which < 2; which++) {
     if (!c->inputs_[which].empty()) {
       if (c->level() + which == 0) {
-        const std::vector<FileMetaData*>& files = c->inputs_[which];
+        const std::vector<FileMetaData*>& files = c->inputs_[which];  // This level files
         for (size_t i = 0; i < files.size(); i++) {
           list[num++] = table_cache_->NewIterator(
               options, files[i]->number, files[i]->file_size);
@@ -1153,7 +1155,7 @@ Iterator* VersionSet::MakeInputIterator(Compaction* c) {
     }
   }
   assert(num <= space);
-  Iterator* result = NewMergingIterator(&icmp_, list, num);
+  Iterator* result = NewMergingIterator(&icmp_, list, num);  // Every children iterator is key-data TwoLevelIterator
   delete[] list;
   return result;
 }

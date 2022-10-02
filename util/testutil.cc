@@ -36,7 +36,7 @@ extern Slice CompressibleString(Random* rnd, double compressed_fraction,
   int raw = static_cast<int>(len * compressed_fraction);
   if (raw < 1) raw = 1;
   std::string raw_data;
-  RandomString(rnd, raw, &raw_data);  // Randomly generate raw_data string
+  RandomString(rnd, raw, &raw_data);
 
   // Duplicate the random data until we have filled "len" bytes
   dst->clear();
