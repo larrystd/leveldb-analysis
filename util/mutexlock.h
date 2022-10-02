@@ -27,7 +27,7 @@ class MutexLock {
   ~MutexLock() { this->mu_->Unlock(); }
 
  private:
-  port::Mutex *const mu_;
+  port::Mutex *const mu_;  // warpper of port::Mutex
   // No copying allowed
   MutexLock(const MutexLock&);
   void operator=(const MutexLock&);

@@ -62,6 +62,7 @@ inline uint32_t DecodeFixed32(const char* ptr) {
     memcpy(&result, ptr, sizeof(result));  // gcc optimizes this to a plain load
     return result;
   } else {
+    // 这个写法值得借鉴思考
     return ((static_cast<uint32_t>(static_cast<unsigned char>(ptr[0])))
         | (static_cast<uint32_t>(static_cast<unsigned char>(ptr[1])) << 8)
         | (static_cast<uint32_t>(static_cast<unsigned char>(ptr[2])) << 16)

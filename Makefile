@@ -159,7 +159,7 @@ ifeq ($(PLATFORM), IOS)
 SIMULATORROOT=/Developer/Platforms/iPhoneSimulator.platform/Developer
 DEVICEROOT=/Developer/Platforms/iPhoneOS.platform/Developer
 IOSVERSION=$(shell defaults read /Developer/Platforms/iPhoneOS.platform/version CFBundleShortVersionString)
-
+  
 .cc.o:
 	mkdir -p ios-x86/$(dir $@)
 	$(SIMULATORROOT)/usr/bin/$(CXX) $(CXXFLAGS) -isysroot $(SIMULATORROOT)/SDKs/iPhoneSimulator$(IOSVERSION).sdk -arch i686 -c $< -o ios-x86/$@

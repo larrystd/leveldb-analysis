@@ -25,14 +25,16 @@ namespace {
 struct LRUHandle {
   void* value;
   void (*deleter)(const Slice&, void* value);
+  // open hash list next
   LRUHandle* next_hash;
+  // double linked list
   LRUHandle* next;
   LRUHandle* prev;
   size_t charge;      // TODO(opt): Only allow uint32_t?
   size_t key_length;
   uint32_t refs;
-  uint32_t hash;      // Hash of key(); used for fast sharding and comparisons
-  char key_data[1];   // Beginning of key
+  uint32_t hash;      // Hash value of key(); used for fast sharding and comparisons
+  char key_data[1];   // Beginning of key, just store begin address in class member
 
   Slice key() const {
     // For cheaper lookups, we allow a temporary Handle object
@@ -60,9 +62,9 @@ class HandleTable {
   }
 
   LRUHandle* Insert(LRUHandle* h) {
-    LRUHandle** ptr = FindPointer(h->key(), h->hash);
-    LRUHandle* old = *ptr;
-    h->next_hash = (old == NULL ? NULL : old->next_hash);
+    LRUHandle** ptr = FindPointer(h->key(), h->hash);  // 如果存在用h替换该值返回旧值，不存在直接设置ptr为h
+    LRUHandle* old = *ptr;  // Return oldValue
+    h->next_hash = (old == NULL ? NULL : old->next_hash);  // Set h->next
     *ptr = h;
     if (old == NULL) {
       ++elems_;
@@ -79,10 +81,10 @@ class HandleTable {
     LRUHandle** ptr = FindPointer(key, hash);
     LRUHandle* result = *ptr;
     if (result != NULL) {
-      *ptr = result->next_hash;
+      *ptr = result->next_hash;  // 等价于result被剔除链表
       --elems_;
     }
-    return result;
+    return result;  // 返回被删除的值
   }
 
  private:
@@ -96,9 +98,10 @@ class HandleTable {
   // matches key/hash.  If there is no such cache entry, return a
   // pointer to the trailing slot in the corresponding linked list.
   LRUHandle** FindPointer(const Slice& key, uint32_t hash) {
-    LRUHandle** ptr = &list_[hash & (length_ - 1)];
+    LRUHandle** ptr = &list_[hash & (length_ -1)];  // hash table index
+    // Following hashtable's open list to get key
     while (*ptr != NULL &&
-           ((*ptr)->hash != hash || key != (*ptr)->key())) {
+          ((*ptr)->hash != hash || key != (*ptr)->key())) {
       ptr = &(*ptr)->next_hash;
     }
     return ptr;
@@ -109,6 +112,7 @@ class HandleTable {
     while (new_length < elems_) {
       new_length *= 2;
     }
+    // Create new_length list
     LRUHandle** new_list = new LRUHandle*[new_length];
     memset(new_list, 0, sizeof(new_list[0]) * new_length);
     uint32_t count = 0;
@@ -117,16 +121,16 @@ class HandleTable {
       while (h != NULL) {
         LRUHandle* next = h->next_hash;
         Slice key = h->key();
-        uint32_t hash = h->hash;
+        uint32_t hash = h->hash;  // old hash key
         LRUHandle** ptr = &new_list[hash & (new_length - 1)];
-        h->next_hash = *ptr;
+        h->next_hash = *ptr;  // make new hashtable point to old hashkey
         *ptr = h;
         h = next;
         count++;
       }
     }
     assert(elems_ == count);
-    delete[] list_;
+    delete[] list_;  // delete old list
     list_ = new_list;
     length_ = new_length;
   }
@@ -189,13 +193,13 @@ LRUCache::~LRUCache() {
 void LRUCache::Unref(LRUHandle* e) {
   assert(e->refs > 0);
   e->refs--;
-  if (e->refs <= 0) {
+  if (e->refs <= 0) {  // 调用析构
     usage_ -= e->charge;
     (*e->deleter)(e->key(), e->value);
     free(e);
   }
 }
-
+// Remove and append
 void LRUCache::LRU_Remove(LRUHandle* e) {
   e->next->prev = e->prev;
   e->prev->next = e->next;
@@ -229,7 +233,7 @@ Cache::Handle* LRUCache::Insert(
     const Slice& key, uint32_t hash, void* value, size_t charge,
     void (*deleter)(const Slice& key, void* value)) {
   MutexLock l(&mutex_);
-
+  // Set newValue
   LRUHandle* e = reinterpret_cast<LRUHandle*>(
       malloc(sizeof(LRUHandle)-1 + key.size()));
   e->value = value;
@@ -242,10 +246,10 @@ Cache::Handle* LRUCache::Insert(
   LRU_Append(e);
   usage_ += charge;
 
-  LRUHandle* old = table_.Insert(e);
+  LRUHandle* old = table_.Insert(e);  // 插入新值, 如果原key存在返回旧值
   if (old != NULL) {
     LRU_Remove(old);
-    Unref(old);
+    Unref(old);  // 析构旧值
   }
 
   while (usage_ > capacity_ && lru_.next != &lru_) {

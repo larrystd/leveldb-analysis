@@ -1,5 +1,7 @@
 build_config.mk
 *.a
 *.o
+*.so
 *_test
 db_bench
+build/*

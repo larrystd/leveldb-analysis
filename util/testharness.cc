@@ -11,7 +11,6 @@
 
 namespace leveldb {
 namespace test {
-
 namespace {
 struct Test {
   const char* base;
@@ -20,10 +19,10 @@ struct Test {
 };
 std::vector<Test>* tests;
 }
-
+// Construct Test instance and push it to vector tests.
 bool RegisterTest(const char* base, const char* name, void (*func)()) {
   if (tests == NULL) {
-    tests = new std::vector<Test>;
+    tests = new std::vector<Test>;  // 初次创建
   }
   Test t;
   t.base = base;
@@ -44,19 +43,19 @@ int RunAllTests() {
         std::string name = t.base;
         name.push_back('.');
         name.append(t.name);
+        // strstr return first position that s2 appears in s1
         if (strstr(name.c_str(), matcher) == NULL) {
           continue;
         }
       }
       fprintf(stderr, "==== Test %s.%s\n", t.base, t.name);
-      (*t.func)();
+      (*t.func)();  // Run one test
       ++num;
     }
   }
-  fprintf(stderr, "==== PASSED %d tests\n", num);
+  fprintf(stderr, "==== PASSED %d tests\n", num);  // printf PASSED num tests
   return 0;
 }
-
 std::string TmpDir() {
   std::string dir;
   Status s = Env::Default()->GetTestDirectory(&dir);

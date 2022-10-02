@@ -49,8 +49,8 @@ void BlockBuilder::Reset() {
   buffer_.clear();
   restarts_.clear();
   restarts_.push_back(0);       // First restart point is at offset 0
-  counter_ = 0;
-  finished_ = false;
+  counter_ = 0;                 // Number of key-value data
+  finished_ = false;            // If finished_, it should be insert key-value data pair
   last_key_.clear();
 }
 
@@ -61,7 +61,7 @@ size_t BlockBuilder::CurrentSizeEstimate() const {
 }
 
 Slice BlockBuilder::Finish() {
-  // Append restart array
+  // Append restart array to buffer_
   for (size_t i = 0; i < restarts_.size(); i++) {
     PutFixed32(&buffer_, restarts_[i]);
   }
@@ -71,6 +71,7 @@ Slice BlockBuilder::Finish() {
 }
 
 void BlockBuilder::Add(const Slice& key, const Slice& value) {
+  // Add key, value(i.e. datablock) to buffer_
   Slice last_key_piece(last_key_);
   assert(!finished_);
   assert(counter_ <= options_->block_restart_interval);
@@ -90,14 +91,14 @@ void BlockBuilder::Add(const Slice& key, const Slice& value) {
   }
   const size_t non_shared = key.size() - shared;
 
-  // Add "<shared><non_shared><value_size>" to buffer_
+  // Add "<shared><non_shared><value_size>" (three value) to buffer_
   PutVarint32(&buffer_, shared);
   PutVarint32(&buffer_, non_shared);
   PutVarint32(&buffer_, value.size());
 
   // Add string delta to buffer_ followed by value
-  buffer_.append(key.data() + shared, non_shared);
-  buffer_.append(value.data(), value.size());
+  buffer_.append(key.data() + shared, non_shared);  // Add key to buffer_
+  buffer_.append(value.data(), value.size());  // Add value to buffer_
 
   // Update state
   last_key_.resize(shared);

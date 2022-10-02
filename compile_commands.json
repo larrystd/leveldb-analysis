@@ -1,0 +1,22 @@
+[
+    {
+        "arguments": [
+            "c++",
+            "-c",
+            "-I.",
+            "-I./include",
+            "-fno-builtin-memcmp",
+            "-pthread",
+            "-DOS_LINUX",
+            "-DLEVELDB_PLATFORM_POSIX",
+            "-DSNAPPY",
+            "-O2",
+            "-DNDEBUG",
+            "-o",
+            "table/format.o",
+            "table/format.cc"
+        ],
+        "directory": "/home/larry/curproj/leveldb",
+        "file": "table/format.cc"
+    }
+]

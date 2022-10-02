@@ -177,10 +177,10 @@ class Constructor {
   virtual DB* db() const { return NULL; }  // Overridden in DBConstructor
 
  private:
-  KVMap data_;
+  KVMap data_;  // KV map imitative k-v db
 };
 
-class BlockConstructor: public Constructor {
+class BlockConstructor: public Constructor {  // wrapper block
  public:
   explicit BlockConstructor(const Comparator* cmp)
       : Constructor(cmp),
@@ -222,7 +222,7 @@ class BlockConstructor: public Constructor {
   BlockConstructor();
 };
 
-class TableConstructor: public Constructor {
+class TableConstructor: public Constructor {  // wrapper Table
  public:
   TableConstructor(const Comparator* cmp)
       : Constructor(cmp),
@@ -769,7 +769,7 @@ TEST(MemTableTest, Simple) {
   delete iter;
   memtable->Unref();
 }
-
+// Judge val is in [low, high]
 static bool Between(uint64_t val, uint64_t low, uint64_t high) {
   bool result = (val >= low) && (val <= high);
   if (!result) {

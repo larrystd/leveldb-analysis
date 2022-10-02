@@ -27,7 +27,7 @@ static std::string BigString(const std::string& partial_string, size_t n) {
 // Construct a string from a number
 static std::string NumberString(int n) {
   char buf[50];
-  snprintf(buf, sizeof(buf), "%d.", n);
+  snprintf(buf, sizeof(buf), "%d.", n);  // 巧妙啊, 整数通过%d得到const 字符串到buffer中
   return std::string(buf);
 }
 
@@ -39,7 +39,7 @@ static std::string RandomSkewedString(int i, Random* rnd) {
 class LogTest {
  private:
   class StringDest : public WritableFile {
-   public:
+   public: 
     std::string contents_;
 
     virtual Status Close() { return Status::OK(); }
@@ -79,7 +79,7 @@ class LogTest {
     virtual Status Skip(uint64_t n) {
       if (n > contents_.size()) {
         contents_.clear();
-        return Status::NotFound("in-memory file skipepd past end");
+        return Status::NotFound("in-memory file skipped past end");
       }
 
       contents_.remove_prefix(n);
@@ -89,7 +89,7 @@ class LogTest {
   };
 
   class ReportCollector : public Reader::Reporter {
-   public:
+   public:  
     size_t dropped_bytes_;
     std::string message_;
 
@@ -104,8 +104,8 @@ class LogTest {
   StringSource source_;
   ReportCollector report_;
   bool reading_;
-  Writer writer_;
-  Reader reader_;
+  Writer writer_;  // log::Writer
+  Reader reader_;  // log::reader_
 
   // Record metadata for testing initial offset functionality
   static size_t initial_offset_record_sizes_[];
@@ -135,7 +135,7 @@ class LogTest {
     std::string scratch;
     Slice record;
     if (reader_.ReadRecord(&record, &scratch)) {
-      return record.ToString();
+      return record.ToString();   // Slice to string
     } else {
       return "EOF";
     }
@@ -148,7 +148,7 @@ class LogTest {
   void SetByte(int offset, char new_byte) {
     dest_.contents_[offset] = new_byte;
   }
-
+  // shrink bytes size
   void ShrinkSize(int bytes) {
     dest_.contents_.resize(dest_.contents_.size() - bytes);
   }
@@ -184,7 +184,7 @@ class LogTest {
   void WriteInitialOffsetLog() {
     for (int i = 0; i < 4; i++) {
       std::string record(initial_offset_record_sizes_[i],
-                         static_cast<char>('a' + i));
+                        static_cast<char>('a' + i));
       Write(record);
     }
   }
@@ -193,21 +193,19 @@ class LogTest {
     WriteInitialOffsetLog();
     reading_ = true;
     source_.contents_ = Slice(dest_.contents_);
-    Reader* offset_reader = new Reader(&source_, &report_, true/*checksum*/,
-                                       WrittenBytes() + offset_past_end);
+    Reader* offset_reader = new Reader(&source_, &report_, true, WrittenBytes() + offset_past_end);
     Slice record;
-    std::string scratch;
+    std::string scratch;  // read record to scratch
     ASSERT_TRUE(!offset_reader->ReadRecord(&record, &scratch));
     delete offset_reader;
   }
 
-  void CheckInitialOffsetRecord(uint64_t initial_offset,
-                                int expected_record_offset) {
+ void CheckInitialOffsetRecord(uint64_t initial_offset,
+                               int expected_record_offset) {
     WriteInitialOffsetLog();
     reading_ = true;
     source_.contents_ = Slice(dest_.contents_);
-    Reader* offset_reader = new Reader(&source_, &report_, true/*checksum*/,
-                                       initial_offset);
+    Reader* offset_reader = new Reader(&source_, &report_, true, initial_offset);
     Slice record;
     std::string scratch;
     ASSERT_TRUE(offset_reader->ReadRecord(&record, &scratch));
@@ -218,7 +216,6 @@ class LogTest {
     ASSERT_EQ((char)('a' + expected_record_offset), record.data()[0]);
     delete offset_reader;
   }
-
 };
 
 size_t LogTest::initial_offset_record_sizes_[] =

@@ -12,7 +12,7 @@
 
 namespace leveldb {
 namespace crc32c {
-
+// 256个number
 static const uint32_t table0_[256] = {
   0x00000000, 0xf26b8303, 0xe13b70f7, 0x1350f3f4,
   0xc79a971f, 0x35f1141c, 0x26a1e7e8, 0xd4ca64eb,

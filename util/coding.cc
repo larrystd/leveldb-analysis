@@ -7,10 +7,10 @@
 namespace leveldb {
 
 void EncodeFixed32(char* buf, uint32_t value) {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if __BYTE_ORDER == __LITTLE_ENDIAN  // 小端序, value低地址元素放在buf低地址区域
   memcpy(buf, &value, sizeof(value));
 #else
-  buf[0] = value & 0xff;
+  buf[0] = value & 0xff;   // 大端序, buf低地址存value的低位, 0xff一个字节
   buf[1] = (value >> 8) & 0xff;
   buf[2] = (value >> 16) & 0xff;
   buf[3] = (value >> 24) & 0xff;
@@ -43,15 +43,15 @@ void PutFixed64(std::string* dst, uint64_t value) {
   EncodeFixed64(buf, value);
   dst->append(buf, sizeof(buf));
 }
-
+// Varint encoder
 char* EncodeVarint32(char* dst, uint32_t v) {
   // Operate on characters as unsigneds
   unsigned char* ptr = reinterpret_cast<unsigned char*>(dst);
   static const int B = 128;
-  if (v < (1<<7)) {
-    *(ptr++) = v;
+  if (v < (1<<7)) {  // 7bit as a unit
+    *(ptr++) = v;  // Equal to *(ptr) = v; ptr++;
   } else if (v < (1<<14)) {
-    *(ptr++) = v | B;
+    *(ptr++) = v | B;  // little endian, low address store low 
     *(ptr++) = v>>7;
   } else if (v < (1<<21)) {
     *(ptr++) = v | B;
@@ -69,7 +69,7 @@ char* EncodeVarint32(char* dst, uint32_t v) {
     *(ptr++) = (v>>21) | B;
     *(ptr++) = v>>28;
   }
-  return reinterpret_cast<char*>(ptr);
+  return reinterpret_cast<char*>(ptr);  // ptr-dest is size of buffer
 }
 
 void PutVarint32(std::string* dst, uint32_t v) {

@@ -28,14 +28,14 @@ extern Slice CompressibleString(Random* rnd, double compressed_fraction,
 
 // A wrapper that allows injection of errors.
 class ErrorEnv : public EnvWrapper {
- public:
+ public:  
   bool writable_file_error_;
   int num_writable_file_errors_;
 
   ErrorEnv() : EnvWrapper(Env::Default()),
                writable_file_error_(false),
                num_writable_file_errors_(0) { }
-
+  
   virtual Status NewWritableFile(const std::string& fname,
                                  WritableFile** result) {
     if (writable_file_error_) {
